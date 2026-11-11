@@ -1,0 +1,430 @@
+[
+ {
+  "name": "index",
+  "request": "GET /",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message",
+    "version"
+   ]
+  }
+ },
+ {
+  "name": "health",
+  "request": "GET /health",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "status",
+    "timestamp"
+   ]
+  }
+ },
+ {
+  "name": "listar tasks",
+  "request": "GET /tasks",
+  "status": 200,
+  "shape": {
+   "type": "list",
+   "len": 10,
+   "item_keys": [
+    "category_id",
+    "category_name",
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "overdue",
+    "priority",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "user_id",
+    "user_name"
+   ]
+  }
+ },
+ {
+  "name": "buscar task",
+  "request": "GET /tasks/1",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "category_id",
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "overdue",
+    "priority",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "user_id"
+   ]
+  }
+ },
+ {
+  "name": "task inexistente",
+  "request": "GET /tasks/9999",
+  "status": 404,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "error"
+   ]
+  }
+ },
+ {
+  "name": "buscar tasks",
+  "request": "GET /tasks/search?q=a&status=pending",
+  "status": 200,
+  "shape": {
+   "type": "list",
+   "len": 6,
+   "item_keys": [
+    "category_id",
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "priority",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "user_id"
+   ]
+  }
+ },
+ {
+  "name": "stats",
+  "request": "GET /tasks/stats",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "cancelled",
+    "completion_rate",
+    "done",
+    "in_progress",
+    "overdue",
+    "pending",
+    "total"
+   ]
+  }
+ },
+ {
+  "name": "criar task",
+  "request": "POST /tasks",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "category_id",
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "priority",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "user_id"
+   ]
+  }
+ },
+ {
+  "name": "criar task invalida",
+  "request": "POST /tasks",
+  "status": 400,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "error"
+   ]
+  }
+ },
+ {
+  "name": "atualizar task",
+  "request": "PUT /tasks/11",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "category_id",
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "priority",
+    "status",
+    "tags",
+    "title",
+    "updated_at",
+    "user_id"
+   ]
+  }
+ },
+ {
+  "name": "atualizar task status invalido",
+  "request": "PUT /tasks/11",
+  "status": 400,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "error"
+   ]
+  }
+ },
+ {
+  "name": "deletar task",
+  "request": "DELETE /tasks/11",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message"
+   ]
+  }
+ },
+ {
+  "name": "listar usuarios",
+  "request": "GET /users",
+  "status": 200,
+  "shape": {
+   "type": "list",
+   "len": 3,
+   "item_keys": [
+    "active",
+    "created_at",
+    "email",
+    "id",
+    "name",
+    "role",
+    "task_count"
+   ]
+  }
+ },
+ {
+  "name": "buscar usuario",
+  "request": "GET /users/1",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "active",
+    "created_at",
+    "email",
+    "id",
+    "name",
+    "role",
+    "tasks"
+   ]
+  }
+ },
+ {
+  "name": "tasks do usuario",
+  "request": "GET /users/1/tasks",
+  "status": 200,
+  "shape": {
+   "type": "list",
+   "len": 4,
+   "item_keys": [
+    "created_at",
+    "description",
+    "due_date",
+    "id",
+    "overdue",
+    "priority",
+    "status",
+    "title"
+   ]
+  }
+ },
+ {
+  "name": "criar usuario",
+  "request": "POST /users",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "active",
+    "created_at",
+    "email",
+    "id",
+    "name",
+    "role"
+   ]
+  }
+ },
+ {
+  "name": "criar usuario email duplicado",
+  "request": "POST /users",
+  "status": 409,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "error"
+   ]
+  }
+ },
+ {
+  "name": "atualizar usuario",
+  "request": "PUT /users/4",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "active",
+    "created_at",
+    "email",
+    "id",
+    "name",
+    "role"
+   ]
+  }
+ },
+ {
+  "name": "login ok (seed)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message",
+    "token",
+    "user"
+   ]
+  }
+ },
+ {
+  "name": "login ok (criado)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message",
+    "token",
+    "user"
+   ]
+  }
+ },
+ {
+  "name": "login errado",
+  "request": "POST /login",
+  "status": 401,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "error"
+   ]
+  }
+ },
+ {
+  "name": "deletar usuario",
+  "request": "DELETE /users/4",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message"
+   ]
+  }
+ },
+ {
+  "name": "relatorio resumo",
+  "request": "GET /reports/summary",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "generated_at",
+    "overdue",
+    "overview",
+    "recent_activity",
+    "tasks_by_priority",
+    "tasks_by_status",
+    "user_productivity"
+   ]
+  }
+ },
+ {
+  "name": "relatorio usuario",
+  "request": "GET /reports/user/1",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "statistics",
+    "user"
+   ]
+  }
+ },
+ {
+  "name": "listar categorias",
+  "request": "GET /categories",
+  "status": 200,
+  "shape": {
+   "type": "list",
+   "len": 4,
+   "item_keys": [
+    "color",
+    "created_at",
+    "description",
+    "id",
+    "name",
+    "task_count"
+   ]
+  }
+ },
+ {
+  "name": "criar categoria",
+  "request": "POST /categories",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "color",
+    "created_at",
+    "description",
+    "id",
+    "name"
+   ]
+  }
+ },
+ {
+  "name": "atualizar categoria",
+  "request": "PUT /categories/5",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "color",
+    "created_at",
+    "description",
+    "id",
+    "name"
+   ]
+  }
+ },
+ {
+  "name": "deletar categoria",
+  "request": "DELETE /categories/5",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "message"
+   ]
+  }
+ }
+]

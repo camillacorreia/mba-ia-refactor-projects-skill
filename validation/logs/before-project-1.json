@@ -1,0 +1,312 @@
+[
+ {
+  "name": "index",
+  "request": "GET /",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "endpoints",
+    "mensagem",
+    "versao"
+   ]
+  }
+ },
+ {
+  "name": "health",
+  "request": "GET /health",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "ambiente",
+    "counts",
+    "database",
+    "db_path",
+    "debug",
+    "secret_key",
+    "status",
+    "versao"
+   ]
+  }
+ },
+ {
+  "name": "listar produtos",
+  "request": "GET /produtos",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "buscar produtos",
+  "request": "GET /produtos/busca?q=Mouse&preco_max=500",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso",
+    "total"
+   ]
+  }
+ },
+ {
+  "name": "buscar produto",
+  "request": "GET /produtos/1",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "produto inexistente",
+  "request": "GET /produtos/9999",
+  "status": 404,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "criar produto",
+  "request": "POST /produtos",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "criar produto invalido",
+  "request": "POST /produtos",
+  "status": 400,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "atualizar produto",
+  "request": "PUT /produtos/11",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "deletar produto",
+  "request": "DELETE /produtos/11",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "listar usuarios",
+  "request": "GET /usuarios",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "buscar usuario",
+  "request": "GET /usuarios/1",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "criar usuario",
+  "request": "POST /usuarios",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "login ok (seed)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "login ok (criado)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "login errado",
+  "request": "POST /login",
+  "status": 401,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "criar pedido",
+  "request": "POST /pedidos",
+  "status": 201,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "pedido sem estoque",
+  "request": "POST /pedidos",
+  "status": 400,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "listar pedidos",
+  "request": "GET /pedidos",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "pedidos do usuario",
+  "request": "GET /pedidos/usuario/2",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "atualizar status",
+  "request": "PUT /pedidos/1/status",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "status invalido",
+  "request": "PUT /pedidos/1/status",
+  "status": 400,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "relatorio vendas",
+  "request": "GET /relatorios/vendas",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "admin query",
+  "request": "POST /admin/query",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "admin reset-db",
+  "request": "POST /admin/reset-db",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "mensagem",
+    "sucesso"
+   ]
+  }
+ }
+]

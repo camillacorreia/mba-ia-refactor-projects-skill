@@ -1,0 +1,34 @@
+ * Serving Flask app 'app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5053
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /tasks HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /tasks/1 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[33mGET /tasks/9999 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /tasks/search?q=a&status=pending HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /tasks/stats HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[35m[1mPOST /tasks HTTP/1.1[0m" 201 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[31m[1mPOST /tasks HTTP/1.1[0m" 400 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "PUT /tasks/11 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[31m[1mPUT /tasks/11 HTTP/1.1[0m" 400 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "DELETE /tasks/11 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /users HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /users/1 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /users/1/tasks HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[35m[1mPOST /users HTTP/1.1[0m" 201 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[31m[1mPOST /users HTTP/1.1[0m" 409 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "PUT /users/4 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[31m[1mPOST /login HTTP/1.1[0m" 401 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "DELETE /users/4 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /reports/summary HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /reports/user/1 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "GET /categories HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "[35m[1mPOST /categories HTTP/1.1[0m" 201 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "PUT /categories/5 HTTP/1.1" 200 -
+127.0.0.1 - - [11/Nov/2026 19:56:59] "DELETE /categories/5 HTTP/1.1" 200 -

@@ -1,0 +1,7 @@
+2026-11-11T23:17:36.631Z WARN PAYMENT_GATEWAY_KEY ausente, usando gateway simulado
+2026-11-11T23:17:36.635Z INFO LMS API rodando na porta 3011
+2026-11-11T23:17:38.060Z INFO payment_processed card=****4444 amount=497 status=PAID
+2026-11-11T23:17:38.099Z INFO checkout_completed userId=2 courseId=2 enrollmentId=2
+2026-11-11T23:17:38.103Z INFO payment_processed card=****4444 amount=497 status=PAID
+2026-11-11T23:17:38.104Z INFO checkout_completed userId=1 courseId=2 enrollmentId=3
+2026-11-11T23:17:38.105Z INFO payment_processed card=****4444 amount=997 status=DENIED

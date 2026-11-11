@@ -1,0 +1,66 @@
+[
+ {
+  "name": "checkout sucesso (usuario novo)",
+  "request": "POST /api/checkout",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "enrollment_id",
+    "msg"
+   ]
+  }
+ },
+ {
+  "name": "checkout sucesso (usuario existente)",
+  "request": "POST /api/checkout",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "enrollment_id",
+    "msg"
+   ]
+  }
+ },
+ {
+  "name": "checkout recusado",
+  "request": "POST /api/checkout",
+  "status": 400,
+  "shape": {
+   "type": "text"
+  }
+ },
+ {
+  "name": "checkout curso inexistente",
+  "request": "POST /api/checkout",
+  "status": 404,
+  "shape": {
+   "type": "text"
+  }
+ },
+ {
+  "name": "checkout sem campos",
+  "request": "POST /api/checkout",
+  "status": 400,
+  "shape": {
+   "type": "text"
+  }
+ },
+ {
+  "name": "relatorio financeiro",
+  "request": "GET /api/admin/financial-report",
+  "status": 403,
+  "shape": {
+   "type": "text"
+  }
+ },
+ {
+  "name": "deletar usuario",
+  "request": "DELETE /api/users/1",
+  "status": 403,
+  "shape": {
+   "type": "text"
+  }
+ }
+]

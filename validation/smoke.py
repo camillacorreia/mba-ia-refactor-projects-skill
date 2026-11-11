@@ -5,7 +5,7 @@ e grava, para cada uma, o status HTTP e as chaves do JSON de resposta.
 Uso:
     python validation/smoke.py <spec.json> <base_url> <saida.json>
 
-O spec é uma lista de passos {"name", "method", "path", "body"?, "save"?}.
+O spec é uma lista de passos {"name", "method", "path", "body"?, "headers"?, "save"?}.
 "save" guarda um valor da resposta (caminho com pontos, ex.: "dados.id") numa
 variável que os passos seguintes usam como {{nome}} no path ou no body.
 Só usa a biblioteca padrão, para rodar com qualquer Python 3.
@@ -48,6 +48,8 @@ def call(base, step):
     req = urllib.request.Request(base + step["path"], data=data, method=step["method"])
     if data is not None:
         req.add_header("Content-Type", "application/json")
+    for key, value in step.get("headers", {}).items():
+        req.add_header(key, value)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             status, raw = resp.status, resp.read().decode()
