@@ -1,4 +1,4 @@
-"""Erros de domínio. O error handler converte cada um no status HTTP correspondente."""
+"""Erros de domínio convertidos em resposta JSON pelo error handler global."""
 
 
 class AppError(Exception):

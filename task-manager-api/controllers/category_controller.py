@@ -1,55 +1,46 @@
-from controllers.common import require_object
-from models.category import DEFAULT_COLOR, Category, validate_category_name, validate_color
+from controllers.common import get_or_404, require_payload
+from database import commit, db
+from models.category import DEFAULT_COLOR, Category
 from models.task import Task
-from utils.errors import NotFoundError, ValidationError
+from utils.errors import ValidationError
 
-
-def _get_category(category_id):
-    category = Category.find(category_id)
-    if not category:
-        raise NotFoundError('Categoria não encontrada')
-    return category
+CATEGORY_NOT_FOUND = 'Categoria não encontrada'
 
 
 def list_categories():
-    task_counts = Task.count_by(Task.category_id)
-    result = []
-    for category in Category.list_all():
-        data = category.to_dict()
-        data['task_count'] = task_counts.get(category.id, 0)
-        result.append(data)
-    return result, 200
+    rows = db.session.execute(
+        db.select(Task.category_id, db.func.count(Task.id)).group_by(Task.category_id)
+    ).all()
+    counts = dict(rows)
+    categories = db.session.execute(db.select(Category).order_by(Category.id)).scalars().all()
+    return [category.to_dict(task_count=counts.get(category.id, 0)) for category in categories]
 
 
 def create_category(payload):
-    data = require_object(payload)
+    data = require_payload(payload)
     if not data.get('name'):
         raise ValidationError('Nome é obrigatório')
 
-    category = Category(
-        name=validate_category_name(data['name']),
-        description=data.get('description', ''),
-        color=validate_color(data.get('color', DEFAULT_COLOR)),
-    )
-    category.save()
-    return category.to_dict(), 201
+    category = Category(description='', color=DEFAULT_COLOR)
+    category.apply_changes(data)
+    db.session.add(category)
+    commit()
+    return category.to_dict()
 
 
 def update_category(category_id, payload):
-    category = _get_category(category_id)
-    data = require_object(payload)
-
-    if 'name' in data:
-        category.name = validate_category_name(data['name'])
-    if 'description' in data:
-        category.description = data['description']
-    if 'color' in data:
-        category.color = validate_color(data['color'])
-
-    category.save()
-    return category.to_dict(), 200
+    category = get_or_404(Category, category_id, CATEGORY_NOT_FOUND)
+    if payload is None or not isinstance(payload, dict):
+        raise ValidationError('Dados inválidos')
+    category.apply_changes(payload)
+    commit()
+    return category.to_dict()
 
 
 def delete_category(category_id):
-    _get_category(category_id).delete()
-    return {'message': 'Categoria deletada'}, 200
+    category = get_or_404(Category, category_id, CATEGORY_NOT_FOUND)
+    # Tasks da categoria ficam sem categoria, na mesma transação, em vez de apontar para um id inexistente.
+    db.session.execute(db.update(Task).where(Task.category_id == category_id).values(category_id=None))
+    db.session.delete(category)
+    commit()
+    return {'message': 'Categoria deletada'}

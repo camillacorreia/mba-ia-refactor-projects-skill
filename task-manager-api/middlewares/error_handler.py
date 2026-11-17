@@ -16,7 +16,7 @@ def register_error_handlers(app):
 
     @app.errorhandler(HTTPException)
     def handle_http_error(err):
-        return jsonify({'error': err.name}), err.code
+        return err
 
     @app.errorhandler(Exception)
     def handle_unexpected(err):

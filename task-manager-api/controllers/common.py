@@ -1,15 +1,15 @@
-from utils.errors import ValidationError
+from database import db
+from utils.errors import NotFoundError, ValidationError
 
 
-def require_object(payload):
-    """Corpo JSON precisa ser um objeto não vazio (mesma regra e mensagem do código original)."""
-    if not payload or not isinstance(payload, dict):
+def require_payload(data):
+    if not data or not isinstance(data, dict):
         raise ValidationError('Dados inválidos')
-    return payload
+    return data
 
 
-def parse_int_param(value, name):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        raise ValidationError(f'Parâmetro {name} inválido') from None
+def get_or_404(model, entity_id, message):
+    entity = db.session.get(model, entity_id)
+    if entity is None:
+        raise NotFoundError(message)
+    return entity

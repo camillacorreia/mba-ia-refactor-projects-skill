@@ -1,0 +1,381 @@
+[
+ {
+  "name": "index",
+  "method": "GET",
+  "path": "/",
+  "base": "index"
+ },
+ {
+  "name": "health",
+  "method": "GET",
+  "path": "/health",
+  "base": "health"
+ },
+ {
+  "name": "listar tasks",
+  "method": "GET",
+  "path": "/tasks",
+  "base": "listar tasks"
+ },
+ {
+  "name": "buscar task",
+  "method": "GET",
+  "path": "/tasks/1",
+  "base": "buscar task"
+ },
+ {
+  "name": "task inexistente",
+  "method": "GET",
+  "path": "/tasks/9999",
+  "base": "task inexistente"
+ },
+ {
+  "name": "buscar tasks",
+  "method": "GET",
+  "path": "/tasks/search?q=a&status=pending",
+  "base": "buscar tasks"
+ },
+ {
+  "name": "stats",
+  "method": "GET",
+  "path": "/tasks/stats",
+  "base": "stats"
+ },
+ {
+  "name": "criar task",
+  "method": "POST",
+  "path": "/tasks",
+  "body": {
+   "title": "Task smoke",
+   "priority": 2,
+   "user_id": 1,
+   "category_id": 1,
+   "due_date": "2020-01-01",
+   "tags": [
+    "a",
+    "b"
+   ]
+  },
+  "save": {
+   "tid": "id"
+  },
+  "base": "criar task"
+ },
+ {
+  "name": "criar task invalida",
+  "method": "POST",
+  "path": "/tasks",
+  "body": {
+   "title": "ab"
+  },
+  "base": "criar task invalida"
+ },
+ {
+  "name": "atualizar task",
+  "method": "PUT",
+  "path": "/tasks/{{tid}}",
+  "body": {
+   "status": "in_progress",
+   "priority": 1
+  },
+  "base": "atualizar task"
+ },
+ {
+  "name": "atualizar task status invalido",
+  "method": "PUT",
+  "path": "/tasks/{{tid}}",
+  "body": {
+   "status": "xyz"
+  },
+  "base": "atualizar task status invalido"
+ },
+ {
+  "name": "deletar task",
+  "method": "DELETE",
+  "path": "/tasks/{{tid}}",
+  "base": "deletar task"
+ },
+ {
+  "name": "listar usuarios (sem credencial)",
+  "method": "GET",
+  "path": "/users",
+  "expect": 403
+ },
+ {
+  "name": "listar usuarios (admin)",
+  "method": "GET",
+  "path": "/users",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "listar usuarios"
+ },
+ {
+  "name": "buscar usuario (sem credencial)",
+  "method": "GET",
+  "path": "/users/1",
+  "expect": 403
+ },
+ {
+  "name": "buscar usuario (admin)",
+  "method": "GET",
+  "path": "/users/1",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "buscar usuario"
+ },
+ {
+  "name": "tasks do usuario",
+  "method": "GET",
+  "path": "/users/1/tasks",
+  "base": "tasks do usuario"
+ },
+ {
+  "name": "criar usuario",
+  "method": "POST",
+  "path": "/users",
+  "body": {
+   "name": "Smoke",
+   "email": "smoke@teste.com",
+   "password": "segredo123"
+  },
+  "save": {
+   "uid": "id"
+  },
+  "base": "criar usuario"
+ },
+ {
+  "name": "criar usuario email duplicado",
+  "method": "POST",
+  "path": "/users",
+  "body": {
+   "name": "Smoke",
+   "email": "smoke@teste.com",
+   "password": "segredo123"
+  },
+  "base": "criar usuario email duplicado"
+ },
+ {
+  "name": "atualizar usuario (sem credencial)",
+  "method": "PUT",
+  "path": "/users/{{uid}}",
+  "body": {
+   "name": "Smoke 2"
+  },
+  "expect": 403
+ },
+ {
+  "name": "atualizar usuario (admin)",
+  "method": "PUT",
+  "path": "/users/{{uid}}",
+  "body": {
+   "name": "Smoke 2"
+  },
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "atualizar usuario"
+ },
+ {
+  "name": "login ok (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "password": "1234"
+  },
+  "base": "login ok (seed)"
+ },
+ {
+  "name": "login admin (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "password": "1234"
+  },
+  "save": {
+   "admtok": "token"
+  },
+  "expect": 200
+ },
+ {
+  "name": "listar usuarios (bearer admin)",
+  "method": "GET",
+  "path": "/users",
+  "headers": {
+   "Authorization": "Bearer {{admtok}}"
+  },
+  "expect": 200
+ },
+ {
+  "name": "login user (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "maria@email.com",
+   "password": "abcd"
+  },
+  "save": {
+   "usrtok": "token"
+  },
+  "expect": 200
+ },
+ {
+  "name": "listar usuarios (bearer user)",
+  "method": "GET",
+  "path": "/users",
+  "headers": {
+   "Authorization": "Bearer {{usrtok}}"
+  },
+  "expect": 403
+ },
+ {
+  "name": "listar usuarios (token adulterado)",
+  "method": "GET",
+  "path": "/users",
+  "headers": {
+   "Authorization": "Bearer {{admtok}}x"
+  },
+  "expect": 403
+ },
+ {
+  "name": "criar usuario role admin (sem credencial)",
+  "method": "POST",
+  "path": "/users",
+  "body": {
+   "name": "Escalada",
+   "email": "escalada@teste.com",
+   "password": "segredo123",
+   "role": "admin"
+  },
+  "expect": 403
+ },
+ {
+  "name": "criar usuario role admin (admin)",
+  "method": "POST",
+  "path": "/users",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "body": {
+   "name": "Escalada",
+   "email": "escalada@teste.com",
+   "password": "segredo123",
+   "role": "admin"
+  },
+  "expect": 201
+ },
+ {
+  "name": "criar usuario role user (sem credencial)",
+  "method": "POST",
+  "path": "/users",
+  "body": {
+   "name": "Comum",
+   "email": "comum@teste.com",
+   "password": "segredo123",
+   "role": "user"
+  },
+  "expect": 201
+ },
+ {
+  "name": "login ok (criado)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "smoke@teste.com",
+   "password": "segredo123"
+  },
+  "base": "login ok (criado)"
+ },
+ {
+  "name": "login errado",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "password": "errada"
+  },
+  "base": "login errado"
+ },
+ {
+  "name": "deletar usuario (sem credencial)",
+  "method": "DELETE",
+  "path": "/users/{{uid}}",
+  "expect": 403
+ },
+ {
+  "name": "deletar usuario (admin)",
+  "method": "DELETE",
+  "path": "/users/{{uid}}",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "deletar usuario"
+ },
+ {
+  "name": "relatorio resumo (sem credencial)",
+  "method": "GET",
+  "path": "/reports/summary",
+  "expect": 403
+ },
+ {
+  "name": "relatorio resumo (admin)",
+  "method": "GET",
+  "path": "/reports/summary",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "relatorio resumo"
+ },
+ {
+  "name": "relatorio usuario (sem credencial)",
+  "method": "GET",
+  "path": "/reports/user/1",
+  "expect": 403
+ },
+ {
+  "name": "relatorio usuario (admin)",
+  "method": "GET",
+  "path": "/reports/user/1",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "relatorio usuario"
+ },
+ {
+  "name": "listar categorias",
+  "method": "GET",
+  "path": "/categories",
+  "base": "listar categorias"
+ },
+ {
+  "name": "criar categoria",
+  "method": "POST",
+  "path": "/categories",
+  "body": {
+   "name": "Smoke",
+   "color": "#123456"
+  },
+  "save": {
+   "cid": "id"
+  },
+  "base": "criar categoria"
+ },
+ {
+  "name": "atualizar categoria",
+  "method": "PUT",
+  "path": "/categories/{{cid}}",
+  "body": {
+   "name": "Smoke 2"
+  },
+  "base": "atualizar categoria"
+ },
+ {
+  "name": "deletar categoria",
+  "method": "DELETE",
+  "path": "/categories/{{cid}}",
+  "base": "deletar categoria"
+ }
+]

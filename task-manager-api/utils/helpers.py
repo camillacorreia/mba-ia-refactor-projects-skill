@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
 
-def utcnow():
-    """Agora em UTC, sem tzinfo, para comparar com as colunas DateTime naive já gravadas."""
+def utc_now():
+    """Agora em UTC, sem tzinfo, compatível com as colunas DateTime já gravadas."""
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 

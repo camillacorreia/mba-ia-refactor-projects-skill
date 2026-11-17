@@ -1,10 +1,10 @@
 # Fase 3: task-manager-api (projeto 3)
 
-Saída da Fase 3 da skill `/refactor-arch` depois da resposta `y`, retomando a sessão das Fases 1 e 2 com `claude -p "y" --resume <sessão>`. 6.7 min, 22 turnos, US$ 2.78.
+Saída da Fase 3 da skill `/refactor-arch` depois da resposta `y`, retomando a sessão das Fases 1 e 2 com `claude -p "y" --resume <sessão>`. 5.8 min, 21 turnos. Segunda execução, com o AP-04 corrigido.
 
-Terminei a validação e estou fechando o resumo. Antes disso, um problema que eu causei e que você precisa saber.
+A refatoração terminou e a validação passou: 22 de 22 rotas respondem como antes, e as diferenças são só as mudanças intencionais listadas abaixo. Não fiz commit nem mexi no stage do git; tudo está como mudança não staged na working tree.
 
-Pra remover o `services/notification_service.py` eu usei `git rm`, que deixa a remoção no stage. Outra sessão rodando neste mesmo repositório fez o commit `07761fc` ("Refatora ecommerce-api-legacy...") às 20:17, e esse commit levou junto a remoção do `task-manager-api/services/notification_service.py`. Então hoje esse arquivo está apagado num commit que é sobre outro projeto. Não mexi no histórico. Se quiser separar, dá pra restaurar o arquivo com `git checkout 07761fc~1 -- task-manager-api/services/notification_service.py` e apagar de novo no commit desta refatoração. O resto do que fiz aqui não está staged.
+Um finding da auditoria estava errado: o AP-10 dizia que apagar uma categoria deixava tasks órfãs. O banco da linha de base mostra que não deixa, porque o backref do ORM já zera o `category_id`. A correção que entrou só torna isso explícito e numa transação, sem mudar o comportamento.
 
 ```
 ================================
@@ -12,20 +12,19 @@ PHASE 3: REFACTORING COMPLETE
 ================================
 ## New Project Structure
 task-manager-api/
-├── app.py                      # entry point: python app.py
-├── app_factory.py              # create_app(): config, banco, blueprints, error handler
+├── app.py                      # entry point: app = create_app(settings); python app.py
+├── app_factory.py              # composition root: config, CORS, banco, blueprints, error handlers, NotificationService
 ├── .env.example
 ├── README.md
 ├── requirements.txt
 ├── seed.py
-├── database.py                 # db + init_db (create_all)
 ├── config/
-│   └── settings.py
+│   └── settings.py             # Settings lida do ambiente (.env opcional)
+├── database.py                 # db, commit() com rollback, PRAGMA foreign_keys
 ├── models/
-│   ├── __init__.py             # registra os 3 mappers
-│   ├── task.py                 # regras (is_overdue), validadores, constantes, consultas
-│   ├── user.py                 # hash scrypt + migração MD5, to_dict sem senha
-│   └── category.py
+│   ├── task.py                 # constantes, validação, is_overdue, overdue_filter, to_dict
+│   ├── user.py                 # hash scrypt + migração MD5, roles, validação de e-mail/senha
+│   └── category.py             # validação de nome e cor
 ├── controllers/
 │   ├── common.py
 │   ├── task_controller.py
@@ -33,85 +32,89 @@ task-manager-api/
 │   ├── category_controller.py
 │   └── report_controller.py
 ├── services/
-│   └── report_service.py
-├── routes/
-│   ├── system_routes.py        # / e /health
+│   ├── report_service.py       # agregações com GROUP BY
+│   └── notification_service.py # SMTP injetado, no-op sem config
+├── routes/                     # camada HTTP (views)
 │   ├── task_routes.py
 │   ├── user_routes.py
-│   ├── category_routes.py      # /categories saiu de report_routes
-│   └── report_routes.py
+│   ├── category_routes.py
+│   ├── report_routes.py
+│   └── system_routes.py
 ├── middlewares/
+│   ├── auth.py                 # require_admin, issue_token, verify_token
 │   └── error_handler.py
 └── utils/
-    ├── errors.py
-    └── helpers.py              # utcnow, calculate_percentage
+    ├── errors.py               # ValidationError, NotFoundError, ForbiddenError...
+    └── helpers.py              # utc_now, calculate_percentage
 
 ## Changes by Finding
-[CRITICAL] Hash de senha exposto -> password saiu de User.to_dict(), que é a única serialização de usuário
-[CRITICAL] MD5 sem salt -> scrypt via werkzeug; um MD5 legado é aceito uma vez e regravado no login (testado numa cópia do seu banco)
-[CRITICAL] Segredos hardcoded -> SECRET_KEY/DATABASE_URL vêm do ambiente via config/settings.py; a credencial SMTP saiu junto com o serviço morto
-[CRITICAL] Nenhuma autenticação -> not fixed: muda o contrato de 15 rotas de escrita, fica como decisão de produto (documentado no README)
-[HIGH] Regra de negócio nos handlers -> rotas de 1 linha, controllers orquestram, regras e validação nos models, agregação em report_service
-[HIGH] Debug exposto e CORS aberto -> DEBUG=false e HOST=127.0.0.1 por padrão; CORS_ORIGINS configurável (padrão * como antes)
-[HIGH] Sem composition root -> create_app(settings) em app_factory.py; o seed usa a factory
-[HIGH] Exclusão sem integridade -> cascade explícito em User.tasks; política de categoria declarada. Correção do relatório: o "órfão" de categoria não existia, o backref já anulava o FK (a linha de base mostrou category_id: null)
-[MEDIUM] N+1 -> joinedload em /tasks; GROUP BY em /users, /categories, /tasks/stats e /reports/summary
-[MEDIUM] Validação ausente -> validadores únicos por campo; tipo errado agora dá 400 (prioridade, título, active, cor, tags, query params)
-[MEDIUM] Duplicação -> Task.is_overdue é a única regra de atraso; to_dict/to_summary_dict; regex de email única
-[MEDIUM] except genérico -> error handler global em JSON; zero except no código da aplicação
-[MEDIUM] datetime.utcnow -> utils.helpers.utcnow() (naive UTC, mesmo formato de saída)
-[MEDIUM] Query.get -> db.session.get / db.select
-[LOW] Código morto -> imports e helpers sem uso removidos, NotificationService removido, marshmallow e requests fora do requirements
-[LOW] Magic numbers -> constantes nos models (VALID_STATUSES, MIN/MAX_*, PRIORITY_LABELS, RECENT_ACTIVITY_DAYS...)
-[LOW] print -> logging (seed.py mantém print por ser script de CLI)
-[LOW] Nomes curtos -> p1..p5, u, t, c, cat_data substituídos; campos da API intactos
+[CRITICAL] Rotas privilegiadas sem autenticação (AP-04) -> @require_admin (X-Admin-Token comparado com hmac.compare_digest, ou Bearer de usuário admin) em GET/PUT/DELETE /users/<id>, GET /users, /reports/summary e /reports/user/<id>; POST /users com role diferente de "user" exige credencial; login emite token assinado com itsdangerous (expira em TOKEN_MAX_AGE_SECONDS) no lugar de "fake-jwt-token-<id>"
+[CRITICAL] Hash de senha nas respostas (AP-06) -> password removido de User.to_dict()
+[CRITICAL] MD5 sem salt (AP-05) -> werkzeug generate_password_hash (scrypt); MD5 legado aceito uma vez no login e regravado em scrypt
+[CRITICAL] Segredos hardcoded (AP-01) -> SECRET_KEY, ADMIN_TOKEN e SMTP_* lidos do ambiente; SECRET_KEY aleatória em dev e obrigatória com ENV=production
+[HIGH] Regra de negócio nas rotas (AP-07) -> rotas de 2-3 linhas; fluxo em controllers/, regras nos models, relatórios em services/report_service.py; CRUD de categorias movido para routes/category_routes.py com os mesmos caminhos
+[HIGH] Debug exposto e config fixa (AP-11) -> DEBUG=false, HOST=127.0.0.1, PORT, DATABASE_URL e CORS_ORIGINS vindos do ambiente
+[HIGH] Sem composition root (AP-09) -> create_app() em app_factory.py; NotificationService recebe config/smtp_factory por injeção, sem lista global de notificações, e passa a ser chamado quando uma task é atribuída
+[HIGH] Exclusão de categoria e órfãs (AP-10) -> UPDATE explícito de category_id = NULL e DELETE na mesma transação, delete_user em lote, PRAGMA foreign_keys=ON. Correção do relatório: a linha de base mostrou que o backref do ORM já zerava category_id, então o impacto descrito estava exagerado
+[MEDIUM] N+1 (AP-12) -> joinedload em /tasks, subquery de contagem em /users, GROUP BY em /categories, /tasks/stats e /reports/summary
+[MEDIUM] Validação (AP-13) -> validadores únicos no model para create e update; prioridade e título com tipo errado, ?priority=x e cor inválida respondem 400
+[MEDIUM] Duplicação de atraso e serialização (AP-14) -> Task.is_overdue()/overdue_filter() como implementação única; to_dict com flags e to_summary_dict
+[MEDIUM] Erro genérico (AP-15) -> erros de domínio + error handler global; zero except sem tipo
+[MEDIUM] datetime.utcnow() (AP-16) -> utc_now() naive em UTC em models, serviços e seed
+[MEDIUM] Query.get() (AP-16) -> db.session.get(); SQLAlchemy==2.1.8 fixado no requirements
+[LOW] Magic numbers (AP-18) -> constantes nomeadas em models/task.py, user.py e category.py
+[LOW] Nomes ruins (AP-19) -> renomeados internamente (p1..p5, t, u, c, td no seed), campos da API intactos
+[LOW] print (AP-20) -> logging por módulo; prints restantes só no seed.py (saída de CLI)
+[LOW] Código morto (AP-21) -> imports e helpers sem uso removidos; marshmallow e requests saíram do requirements
 
 ## Intentional Behavior Changes
-- `password` não aparece mais em GET /users/<id>, POST /users, PUT /users/<id> e POST /login (o resto da resposta é igual)
-- Entrada de tipo errado que dava 500 HTML agora dá 400 JSON: priority não numérica, ?priority=x na busca, PUT /categories sem corpo
-- Todo erro do framework (404 de rota, 405, 415, JSON malformado) sai como {"error": ...} em vez de HTML
-- Novas rejeições com 400: active não booleano, cor fora de #RRGGBB, nome vazio no PUT de user/categoria, tags com item não string
-- Erros 500 de commit usam a mensagem genérica "Erro interno" em vez de "Erro ao criar task" etc.
-- python app.py escuta em 127.0.0.1 com debug desligado (HOST=0.0.0.0 e DEBUG=true restauram)
+- GET /users, GET /users/<id>, PUT /users/<id>, DELETE /users/<id>, GET /reports/summary e GET /reports/user/<id>: 200 -> 403 sem credencial; com X-Admin-Token ou Bearer de admin respondem como antes
+- POST /users com role "admin" ou "manager" sem credencial: 201 -> 403
+- Bearer de usuário que não é admin em rota administrativa: 403
+- Campo "password" sumiu de GET /users/<id>, POST/PUT /users e do "user" do /login
+- "token" do /login agora é assinado e expira, no lugar de "fake-jwt-token-<id>"
+- POST /tasks com "priority": "alta" e GET /tasks/search?priority=alta: 500 -> 400 {"error": ...}
+- POST/PUT /categories com cor fora do formato #RRGGBB, nome vazio no PUT ou PUT sem corpo JSON: 400 (antes aceitava, ou dava 500 sem corpo)
+- PUT /tasks com data inválida usa a mesma mensagem do POST ("Formato de data inválido. Use YYYY-MM-DD")
+- Falhas inesperadas devolvem {"error": "Erro interno"} (antes cada rota tinha uma mensagem própria, mesmo status 500)
 
 ## Validation
-  ✓ Application boots without errors (PORT=<p> python app.py e flask --app app run: 0 tracebacks, 0 deprecation; antes eram 113 avisos)
-  ✓ All endpoints respond as before (22/22 rotas, 52 requisições: 49 status iguais, 3 de 500 para 400 intencionais; 9 corpos diferentes, todos listados acima)
-  ✓ Anti-pattern re-scan: 2 remaining (token falso do login, AP-04 não corrigido; hashlib.md5 usado só para conferir hash legado antes de regravar)
+  ✓ Application boots without errors (PORT=<livre> ADMIN_TOKEN=... .venv/bin/python -W always app.py, após python seed.py; nenhum traceback ou DeprecationWarning no log)
+  ✓ All endpoints respond as before (22/22 routes, 59 requisições: 47 iguais, 12 DIFF intencionais: 10x 403 de AP-04, 2x 500->400 de AP-13; payload de 13 GETs comparado campo a campo com o original: idêntico)
+  ✓ Anti-pattern re-scan: 2 remaining (hashlib.md5 em models/user.py:56, usado só para migrar hash legado; print em seed.py:95-98, saída de CLI)
 
 ## How to Run
-python -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python seed.py      # apaga e recria os dados
-.venv/bin/python app.py       # http://127.0.0.1:5000; config opcional em .env (ver .env.example)
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env    # opcional
+python seed.py
+python app.py           # http://127.0.0.1:5000
+curl -H "X-Admin-Token: $ADMIN_TOKEN" http://127.0.0.1:5000/reports/summary
 
 ## Validation Checklist
 ### Fase 1: Análise
-✓ Linguagem detectada corretamente (Python, requirements.txt e 15 .py)
-✓ Framework detectado corretamente (Flask 3.0.0 + Flask-SQLAlchemy 3.1.1)
-✓ Domínio descrito corretamente (tasks, users, categories, relatórios)
-✓ Número de arquivos condiz (15 .py, ~1158 linhas, conferido com wc)
+- ✓ Linguagem detectada corretamente (Python, requirements.txt, 3.14.6 no .venv)
+- ✓ Framework detectado corretamente (Flask 3.0.0 + Flask-SQLAlchemy 3.1.1)
+- ✓ Domínio descrito corretamente (tasks, users, categories, relatórios)
+- ✓ Número de arquivos condiz (15 .py, 1158 linhas, conferido com wc -l)
 ### Fase 2: Auditoria
-✓ Relatório segue o template
-✓ Cada finding tem arquivo e linhas exatos (conferidos com cat -n e grep -n)
-✓ Ordenado de CRITICAL a LOW
-✓ Mínimo de 5 findings (18)
-✓ APIs deprecated incluídas (2, confirmadas com -W always)
-✓ Pausou e pediu confirmação antes da Fase 3
-✗ Precisão: o finding AP-10 exagerou a parte de categorias; a linha de base mostrou que o FK já era anulado
+- ✓ Relatório segue o template (blocos, Summary 4/4/6/4 = Total 18)
+- ✓ Cada finding tem arquivo e linhas exatos (confirmados com grep -n); ✗ parcial no AP-10: impacto exagerado, corrigido acima
+- ✓ Findings ordenados CRITICAL -> LOW
+- ✓ Mínimo de 5 findings (18)
+- ✓ APIs deprecated incluídas (utcnow e Query.get, confirmadas por warnings no log da linha de base)
+- ✓ Pausou e pediu confirmação antes da Fase 3
 ### Fase 3: Refatoração
-✓ Estrutura MVC (models / controllers / routes, mais services e middlewares)
-✓ Config extraída (config/settings.py; o re-scan não acha segredo literal)
-✓ Models abstraem dados (consultas e escrita só nos models e no report_service)
-✓ Routes separadas (só fazem o mapeamento de rota para controller)
-✓ Controllers concentram o fluxo
-✓ Error handling centralizado (middlewares/error_handler.py)
-✓ Entry point claro (app.py -> app_factory.create_app)
-✓ Aplicação inicia sem erros
-✓ Endpoints originais respondem corretamente (diferenças todas intencionais)
+- ✓ Estrutura MVC (models/, controllers/, routes/ como views, services/, middlewares/)
+- ✓ Configuração extraída (config/settings.py, .env.example, re-scan AP-01/AP-11 vazio)
+- ✓ Models abstraem dados e regras (validação, is_overdue, serialização)
+- ✓ Routes separadas e finas (só delegam ao controller)
+- ✓ Controllers concentram o fluxo
+- ✓ Error handling centralizado (middlewares/error_handler.py, zero except sem tipo)
+- ✓ Entry point claro (python app.py, seed.py segue importando app e db)
+- ✓ Aplicação inicia sem erros
+- ✓ Endpoints originais respondem corretamente (22/22, diferenças só as intencionais)
 ================================
 ```
 
-Sobre a validação: toda requisição de teste rodou em cópias do código em `/tmp/refactor-arch-task-manager-api`, porque o `seed.py` apaga o banco. O seu `instance/tasks.db` não foi tocado, e tem um backup dele nessa mesma pasta. Ele ainda tem hashes MD5, que vão sendo convertidos pra scrypt conforme cada usuário faz login.
-
-Não fiz commit. O `.venv/` que criei está no `.gitignore`.
+Para conferir a migração do MD5, criei num banco em memória um usuário com o hash antigo. O login funcionou, o hash virou scrypt e o segundo login também passou. Um token forjado `fake-jwt-token-1` agora recebe 403. Os artefatos da validação (spec, before/after e logs) ficaram em `$TMPDIR/refactor-arch-task-manager-api`, fora do repositório.

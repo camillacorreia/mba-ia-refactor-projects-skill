@@ -1,14 +1,12 @@
-from services import report_service
+from controllers.common import get_or_404
 from models.user import User
-from utils.errors import NotFoundError
+from services import report_service
 
 
-def summary_report():
-    return report_service.build_summary(), 200
+def summary():
+    return report_service.summary()
 
 
 def user_report(user_id):
-    user = User.find(user_id)
-    if not user:
-        raise NotFoundError('Usuário não encontrado')
-    return report_service.build_user_report(user), 200
+    user = get_or_404(User, user_id, 'Usuário não encontrado')
+    return report_service.user_report(user)
