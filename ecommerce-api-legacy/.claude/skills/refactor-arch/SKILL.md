@@ -32,7 +32,8 @@ Scripts auxiliares (só biblioteca padrão do Python, funcionam para qualquer st
 2. Linhas são as do código original, contadas como `cat -n` conta (começa em 1). Use intervalo (`models.py:47-50`) quando o problema ocupa várias linhas.
 3. Não modifique, crie nem apague nenhum arquivo do projeto nas Fases 1 e 2. Comandos só de leitura (`ls`, `find`, `cat`, `grep`, `wc`, `git log`). A única exceção é instalar dependências num ambiente isolado que o git ignora (`.venv/`, `node_modules/`).
 4. Preserve o contrato externo: mesmas rotas, mesmos métodos HTTP, mesmo formato de resposta e mesmo comando de execução. A exceção são correções de segurança (ex.: parar de devolver senha), que precisam aparecer no resumo final como mudança intencional de comportamento.
-5. Adapte ao que o projeto já tem. Um projeto com `models/` e `routes/` não é reescrito do zero: você completa as camadas que faltam e corrige o que está errado dentro delas.
+5. Finding CRITICAL é sempre corrigido na Fase 3. "not fixed" só vale para HIGH, MEDIUM ou LOW, com o motivo. A falta de autenticação em rotas privilegiadas (AP-04) se corrige com o token administrativo do T-13, mesmo que isso mude o status dessas rotas sem credencial.
+6. Adapte ao que o projeto já tem. Um projeto com `models/` e `routes/` não é reescrito do zero: você completa as camadas que faltam e corrige o que está errado dentro delas.
 
 ## Fase 1: Análise do projeto
 

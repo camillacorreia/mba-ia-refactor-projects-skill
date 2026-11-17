@@ -5,12 +5,15 @@ e grava, para cada uma, o status HTTP e as chaves do JSON de resposta.
 Uso:
     python http_smoke.py <spec.json> <base_url> <saida.json>
 
-O spec é uma lista de passos {"name", "method", "path", "body"?, "save"?}.
+O spec é uma lista de passos {"name", "method", "path", "body"?, "headers"?, "save"?}.
+{{NOME}} em maiúsculas é preenchido com a variável de ambiente de mesmo nome
+(ex.: "headers": {"X-Admin-Token": "{{ADMIN_TOKEN}}"}).
 "save" guarda um valor da resposta (caminho com pontos, ex.: "dados.id") numa
 variável que os passos seguintes usam como {{nome}} no path ou no body.
 Só usa a biblioteca padrão, para rodar com qualquer Python 3.
 """
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -48,6 +51,8 @@ def call(base, step):
     req = urllib.request.Request(base + step["path"], data=data, method=step["method"])
     if data is not None:
         req.add_header("Content-Type", "application/json")
+    for name, value in step.get("headers", {}).items():
+        req.add_header(name, value)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             status, raw = resp.status, resp.read().decode()
@@ -63,7 +68,8 @@ def call(base, step):
 def main():
     spec_path, base, out_path = sys.argv[1:4]
     steps = json.load(open(spec_path, encoding="utf-8"))
-    env, results = {}, []
+    env = {k: v for k, v in os.environ.items() if re.fullmatch(r"[A-Z][A-Z0-9_]*", k)}
+    results = []
     for step in steps:
         step = render(step, env)
         status, body = call(base, step)

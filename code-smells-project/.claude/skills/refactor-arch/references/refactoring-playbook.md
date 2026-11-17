@@ -471,33 +471,73 @@ def to_dict(self, include_loans=False):
 
 Remover campo sensível muda o formato da resposta: registre em "Intentional Behavior Changes".
 
-## T-13 Proteger endpoints administrativos
+## T-13 Proteger endpoints que exigem privilégio
 
-Passos: criar middleware/decorator que exige token de admin vindo da config; se o token não estiver configurado, a rota responde 403 (desabilitada por padrão); rota que executa SQL arbitrário só deve existir se for indispensável, e nunca aberta.
+Obrigatório na Fase 3 sempre que houver AP-04. O padrão é um token administrativo vindo da configuração, o mesmo em qualquer stack:
+
+- Header `X-Admin-Token` comparado com a variável de ambiente `ADMIN_TOKEN` em tempo constante (`hmac.compare_digest`, `crypto.timingSafeEqual`).
+- Sem `ADMIN_TOKEN` configurado, a rota responde 403. Ela fica desabilitada por padrão, nunca aberta.
+- `ADMIN_TOKEN` entra no `.env.example` sem valor e no README do projeto, com um exemplo de chamada usando o header.
+
+Onde aplicar, para cada grupo do AP-04:
+
+1. Manutenção e administração: decorator/middleware na rota. Rota de SQL arbitrário é removida, porque não tem uso legítimo numa API.
+2. Relatórios da operação: decorator/middleware na rota.
+3. Gestão de usuários e dados de terceiros: decorator/middleware em listar todos, ver outro usuário, alterar e apagar usuário, e nas listagens globais com dados pessoais.
+4. Escalada de privilégio: o cadastro público continua aberto e aceita só o papel padrão. Papel diferente do padrão, no cadastro ou na atualização, exige o token administrativo; sem ele, 403. O validador de valores permitidos continua igual.
+5. Credencial falsa: o login passa a emitir um token assinado de verdade, com expiração, mantendo a mesma chave na resposta (`token`). Em Flask, `itsdangerous.URLSafeTimedSerializer(SECRET_KEY)`, que já vem com o Flask; em Node, HMAC-SHA256 com `crypto`. O decorator administrativo também aceita `Authorization: Bearer <token>` quando o token é válido e o usuário tem papel de administrador, para o login ter uso real.
 
 Python:
 ```python
-def require_admin_token(view):
+def require_admin(view):
     @wraps(view)
     def wrapper(*args, **kwargs):
         expected = current_app.config.get("ADMIN_TOKEN")
         provided = request.headers.get("X-Admin-Token", "")
-        if not expected or not hmac.compare_digest(provided, expected):
-            raise ForbiddenError("Acesso administrativo negado")
-        return view(*args, **kwargs)
+        if expected and hmac.compare_digest(provided, expected):
+            return view(*args, **kwargs)
+        bearer = request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
+        claims = verify_token(bearer)  # None se inválido ou expirado
+        if claims and claims.get("role") == ADMIN_ROLE:
+            return view(*args, **kwargs)
+        raise ForbiddenError("Acesso administrativo negado")
     return wrapper
+
+def issue_token(user):
+    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt="auth-token")
+    return serializer.dumps({"sub": user.id, "role": user.role})
+
+def verify_token(token):
+    serializer = URLSafeTimedSerializer(current_app.config["SECRET_KEY"], salt="auth-token")
+    try:
+        return serializer.loads(token, max_age=TOKEN_MAX_AGE_SECONDS)
+    except (BadSignature, SignatureExpired):
+        return None
 ```
 
 Node:
 ```js
 module.exports = (config) => (req, res, next) => {
   const token = req.get("X-Admin-Token") || "";
-  if (!config.adminToken || token !== config.adminToken) return res.status(403).send("Acesso negado");
+  if (!config.adminToken || !tokensMatch(token, config.adminToken)) return next(new ForbiddenError());
   next();
 };
 ```
 
-A rota continua existindo (o contrato de caminho e método se mantém), mas responde 403 sem credencial. Registre como mudança intencional.
+Escalada de privilégio, antes:
+```python
+role = data.get("role", "member")
+user.role = role
+```
+
+Depois:
+```python
+role = data.get("role", DEFAULT_ROLE)
+if role != DEFAULT_ROLE and not has_admin_credentials(request):
+    raise ForbiddenError("Definir papel exige credencial administrativa")
+```
+
+As rotas continuam existindo, com o mesmo caminho e método. Sem credencial respondem 403 e, com credencial, respondem como antes. Registre cada uma em "Intentional Behavior Changes".
 
 ## T-14 Constantes nomeadas e nomes descritivos
 

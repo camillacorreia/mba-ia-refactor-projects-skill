@@ -82,17 +82,26 @@ Correção: T-03.
 
 ## AP-04 Endpoint perigoso sem autenticação (CRITICAL)
 
-Rota que executa SQL arbitrário, apaga o banco, deleta usuários ou expõe relatório financeiro/administrativo sem nenhuma verificação de identidade ou permissão.
+Rota que exige privilégio e não verifica identidade nem permissão. Entram aqui cinco grupos, e cada um vira location do mesmo finding:
+
+1. Manutenção e administração: executar SQL arbitrário, resetar ou semear o banco, limpar cache.
+2. Relatórios da operação: faturamento, vendas, resumo geral, métricas de todos os usuários.
+3. Gestão de usuários e dados de terceiros: listar todos os usuários, ver o cadastro de outro usuário, alterar ou apagar usuário, listagens globais com dados pessoais de clientes.
+4. Escalada de privilégio: o cadastro público ou a atualização aceita do corpo da requisição um campo de papel (`role`, `tipo`, `perfil`, `is_admin`) e grava o valor recebido.
+5. Credencial falsa: login que devolve token fixo, previsível ou que nada valida (`"fake-jwt-token-" + id`, `"token-" + email`).
 
 Sinais:
 ```bash
 grep -rn -E "/admin|reset|/query|execute\(\s*(query|sql|dados)" --include=*.py --include=*.js .
+grep -rn -i -E "relatorio|report|summary|financ|/usuarios|/users" --include=*.py --include=*.js .
+grep -rn -E "\b(role|tipo|perfil|is_admin)\b" --include=*.py --include=*.js .   # depois leia o handler: o valor vem do corpo?
+grep -rn -i -E "fake|token['\"]?\s*[:=].*\+" --include=*.py --include=*.js .
 ```
-Verifique se há decorator/middleware de auth na rota. Ausência total de autenticação no projeto inteiro também vira finding (HIGH) quando há rotas de escrita.
+Para cada rota encontrada, verifique se há decorator ou middleware de auth. Rota de negócio comum (catálogo de produtos, CRUD de tarefas, checkout) não entra neste finding; a ausência de autenticação nelas pode ser registrada como observação no relatório, sem mudar o contrato.
 
-Falso positivo: rota admin atrás de middleware de autenticação e checagem de papel.
+Falso positivo: rota atrás de middleware de autenticação com checagem de papel.
 
-Correção: T-13.
+Correção: T-13. Este finding é sempre corrigido na Fase 3; "not fixed" não é resposta aceita para ele.
 
 ## AP-05 Senha em texto puro ou hash fraco (CRITICAL)
 

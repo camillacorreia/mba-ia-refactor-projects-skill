@@ -41,6 +41,7 @@ Regras da spec:
 3. Login: inclua um login válido com usuário do seed e um inválido.
 4. Use `save` para encadear ids criados, em vez de supor ids.
 5. Rotas destrutivas (resetar banco, apagar tudo) vão por último.
+6. Rotas protegidas pelo T-13 aparecem duas vezes: uma sem credencial e outra com `"headers": {"X-Admin-Token": "{{ADMIN_TOKEN}}"}`. O `http_smoke.py` preenche `{{ADMIN_TOKEN}}` com a variável de ambiente. Na linha de base as duas respondem igual. Depois da refatoração, a sem credencial responde 403 e a com credencial responde com o status e o formato da linha de base. Inclua também o cadastro com papel privilegiado sem credencial e o login seguido de uma rota protegida com `Authorization: Bearer {{token}}`, quando o projeto tiver login.
 
 ## 3. Linha de base (antes de editar qualquer arquivo)
 
@@ -62,7 +63,7 @@ Se o projeto tem seed separado (`python seed.py`), rode antes do boot, tanto na 
 ## 4. Depois da refatoração
 
 1. Instale dependências novas, se adicionou alguma, e atualize o manifesto.
-2. Suba a aplicação pelo comando documentado no README (ex.: `PORT=$PORT python app.py`, `PORT=$PORT npm start`). O boot precisa funcionar sem nenhuma variável de ambiente além da porta.
+2. Suba a aplicação pelo comando documentado no README (ex.: `PORT=$PORT python app.py`, `PORT=$PORT npm start`). O boot precisa funcionar sem nenhuma variável de ambiente além da porta. Para o smoke, exporte também `ADMIN_TOKEN` com um valor de teste, no servidor e no `http_smoke.py`.
 3. Confira o log de boot: nenhum traceback, nenhum aviso de deprecation que estava na lista do AP-16.
 4. Rode a mesma spec e gere `$WORK/after.json`.
 5. Compare status por status:
@@ -84,7 +85,7 @@ Cada `DIFF` precisa ser uma mudança intencional listada no resumo final (ex.: r
 
 ## 5. Re-scan de anti-patterns
 
-Rode de novo os comandos de detecção do catálogo para os itens CRITICAL e HIGH (AP-01, AP-02, AP-05, AP-06, AP-08, AP-11) e para AP-16. O resultado esperado é zero ocorrência no código da aplicação. Ocorrências restantes entram no resumo com o motivo (ex.: senha de usuário fictício no seed, documentada).
+Rode de novo os comandos de detecção do catálogo para os itens CRITICAL e HIGH (AP-01, AP-02, AP-04, AP-05, AP-06, AP-08, AP-11) e para AP-16. Para o AP-04, confira rota por rota que cada location do finding tem o decorator/middleware e que o smoke mostra 403 sem credencial. O resultado esperado é zero ocorrência no código da aplicação. Ocorrências restantes entram no resumo com o motivo (ex.: senha de usuário fictício no seed, documentada).
 
 ## 6. Checklist final
 
