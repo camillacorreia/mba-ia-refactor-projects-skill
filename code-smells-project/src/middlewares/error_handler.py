@@ -1,4 +1,4 @@
-"""Converte erros de domínio e exceções inesperadas em JSON no formato {"erro": ...}."""
+"""Conversão centralizada de exceções em respostas JSON."""
 import logging
 
 from flask import jsonify
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def register_error_handlers(app):
     @app.errorhandler(AppError)
     def handle_app_error(err):
-        return jsonify({"erro": err.message, **err.extra}), err.status
+        return jsonify(err.to_dict()), err.status
 
     @app.errorhandler(HTTPException)
     def handle_http_error(err):
@@ -20,5 +20,5 @@ def register_error_handlers(app):
 
     @app.errorhandler(Exception)
     def handle_unexpected(err):
-        logger.exception("Erro inesperado")
+        logger.exception("erro_inesperado")
         return jsonify({"erro": "Erro interno"}), 500

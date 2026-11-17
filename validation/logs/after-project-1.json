@@ -125,7 +125,18 @@
   }
  },
  {
-  "name": "listar usuarios",
+  "name": "listar usuarios (sem credencial)",
+  "request": "GET /usuarios",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "listar usuarios (admin)",
   "request": "GET /usuarios",
   "status": 200,
   "shape": {
@@ -137,7 +148,18 @@
   }
  },
  {
-  "name": "buscar usuario",
+  "name": "buscar usuario (sem credencial)",
+  "request": "GET /usuarios/1",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "buscar usuario (admin)",
   "request": "GET /usuarios/1",
   "status": 200,
   "shape": {
@@ -169,7 +191,81 @@
    "keys": [
     "dados",
     "mensagem",
+    "sucesso",
+    "token"
+   ]
+  }
+ },
+ {
+  "name": "login admin (seed)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso",
+    "token"
+   ]
+  }
+ },
+ {
+  "name": "relatorio vendas (bearer admin)",
+  "request": "GET /relatorios/vendas",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
     "sucesso"
+   ]
+  }
+ },
+ {
+  "name": "login cliente (seed)",
+  "request": "POST /login",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "dados",
+    "mensagem",
+    "sucesso",
+    "token"
+   ]
+  }
+ },
+ {
+  "name": "listar usuarios (bearer cliente)",
+  "request": "GET /usuarios",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "relatorio vendas (token adulterado)",
+  "request": "GET /relatorios/vendas",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "relatorio vendas (X-Admin-Token errado)",
+  "request": "GET /relatorios/vendas",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
    ]
   }
  },
@@ -182,7 +278,8 @@
    "keys": [
     "dados",
     "mensagem",
-    "sucesso"
+    "sucesso",
+    "token"
    ]
   }
  },
@@ -224,7 +321,18 @@
   }
  },
  {
-  "name": "listar pedidos",
+  "name": "listar pedidos (sem credencial)",
+  "request": "GET /pedidos",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "listar pedidos (admin)",
   "request": "GET /pedidos",
   "status": 200,
   "shape": {
@@ -236,7 +344,18 @@
   }
  },
  {
-  "name": "pedidos do usuario",
+  "name": "pedidos do usuario (sem credencial)",
+  "request": "GET /pedidos/usuario/2",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "pedidos do usuario (admin)",
   "request": "GET /pedidos/usuario/2",
   "status": 200,
   "shape": {
@@ -248,7 +367,18 @@
   }
  },
  {
-  "name": "atualizar status",
+  "name": "atualizar status (sem credencial)",
+  "request": "PUT /pedidos/1/status",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "atualizar status (admin)",
   "request": "PUT /pedidos/1/status",
   "status": 200,
   "shape": {
@@ -260,7 +390,18 @@
   }
  },
  {
-  "name": "status invalido",
+  "name": "status invalido (sem credencial)",
+  "request": "PUT /pedidos/1/status",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "status invalido (admin)",
   "request": "PUT /pedidos/1/status",
   "status": 400,
   "shape": {
@@ -271,7 +412,18 @@
   }
  },
  {
-  "name": "relatorio vendas",
+  "name": "relatorio vendas (sem credencial)",
+  "request": "GET /relatorios/vendas",
+  "status": 403,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "relatorio vendas (admin)",
   "request": "GET /relatorios/vendas",
   "status": 200,
   "shape": {
@@ -294,13 +446,24 @@
   }
  },
  {
-  "name": "admin reset-db",
+  "name": "admin reset-db (sem credencial)",
   "request": "POST /admin/reset-db",
   "status": 403,
   "shape": {
    "type": "object",
    "keys": [
-    "erro",
+    "erro"
+   ]
+  }
+ },
+ {
+  "name": "admin reset-db (admin)",
+  "request": "POST /admin/reset-db",
+  "status": 200,
+  "shape": {
+   "type": "object",
+   "keys": [
+    "mensagem",
     "sucesso"
    ]
   }

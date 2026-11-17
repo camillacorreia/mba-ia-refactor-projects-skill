@@ -1,22 +1,22 @@
-"""Relatório de vendas com a regra de desconto por faixa de faturamento."""
+"""Relatório de vendas e política de desconto por faixa de faturamento."""
 from src.models import pedido_model
 
-# (faturamento mínimo exclusivo, percentual de desconto), da maior faixa para a menor
+# (faturamento mínimo exclusivo, fração de desconto), da maior faixa para a menor
 FAIXAS_DESCONTO = [(10000, 0.10), (5000, 0.05), (1000, 0.02)]
 
 
-def calcular_desconto(faturamento):
-    for limite, percentual in FAIXAS_DESCONTO:
-        if faturamento > limite:
-            return faturamento * percentual
+def desconto_aplicavel(faturamento):
+    for minimo, fracao in FAIXAS_DESCONTO:
+        if faturamento > minimo:
+            return faturamento * fracao
     return 0
 
 
 def relatorio_vendas(db):
-    resumo = pedido_model.resumo(db)
+    resumo = pedido_model.resumo_vendas(db)
     faturamento = resumo["faturamento"]
     total_pedidos = resumo["total_pedidos"]
-    desconto = calcular_desconto(faturamento)
+    desconto = desconto_aplicavel(faturamento)
     return {
         "total_pedidos": total_pedidos,
         "faturamento_bruto": round(faturamento, 2),

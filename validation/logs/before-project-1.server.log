@@ -1,31 +1,31 @@
  * Serving Flask app 'app'
  * Debug mode: off
 [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on http://127.0.0.1:5051
+ * Running on http://127.0.0.1:5101
 [33mPress CTRL+C to quit[0m
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /health HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /produtos HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /produtos/busca?q=Mouse&preco_max=500 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /produtos/1 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[33mGET /produtos/9999 HTTP/1.1[0m" 404 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[35m[1mPOST /produtos HTTP/1.1[0m" 201 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[31m[1mPOST /produtos HTTP/1.1[0m" 400 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "PUT /produtos/11 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "DELETE /produtos/11 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /usuarios HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /usuarios/1 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[35m[1mPOST /usuarios HTTP/1.1[0m" 201 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "POST /login HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "POST /login HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[31m[1mPOST /login HTTP/1.1[0m" 401 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[35m[1mPOST /pedidos HTTP/1.1[0m" 201 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[31m[1mPOST /pedidos HTTP/1.1[0m" 400 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /pedidos HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /pedidos/usuario/2 HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "PUT /pedidos/1/status HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "[31m[1mPUT /pedidos/1/status HTTP/1.1[0m" 400 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "GET /relatorios/vendas HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "POST /admin/query HTTP/1.1" 200 -
-127.0.0.1 - - [11/Nov/2026 19:56:54] "POST /admin/reset-db HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /health HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /produtos HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /produtos/busca?q=Mouse&preco_max=500 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /produtos/1 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[33mGET /produtos/9999 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[35m[1mPOST /produtos HTTP/1.1[0m" 201 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[31m[1mPOST /produtos HTTP/1.1[0m" 400 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "PUT /produtos/11 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "DELETE /produtos/11 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /usuarios HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /usuarios/1 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[35m[1mPOST /usuarios HTTP/1.1[0m" 201 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "POST /login HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[31m[1mPOST /login HTTP/1.1[0m" 401 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[35m[1mPOST /pedidos HTTP/1.1[0m" 201 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[31m[1mPOST /pedidos HTTP/1.1[0m" 400 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /pedidos HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /pedidos/usuario/2 HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "PUT /pedidos/1/status HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "[31m[1mPUT /pedidos/1/status HTTP/1.1[0m" 400 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "GET /relatorios/vendas HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "POST /admin/query HTTP/1.1" 200 -
+127.0.0.1 - - [17/Nov/2026 15:49:10] "POST /admin/reset-db HTTP/1.1" 200 -

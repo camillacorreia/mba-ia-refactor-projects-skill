@@ -3,7 +3,8 @@ import logging
 import sqlite3
 
 from flask import current_app, g
-from werkzeug.security import generate_password_hash
+
+from src.models import usuario_model
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
 );
 CREATE TABLE IF NOT EXISTS pedidos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    usuario_id INTEGER,
+    usuario_id INTEGER REFERENCES usuarios(id),
     status TEXT DEFAULT 'pendente',
     total REAL,
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS itens_pedido (
 );
 """
 
+# Dados fictícios de desenvolvimento. As senhas são gravadas com hash no seed.
 SEED_PRODUTOS = [
     ("Notebook Gamer", "Notebook potente para jogos", 5999.99, 10, "informatica"),
     ("Mouse Wireless", "Mouse sem fio ergonômico", 89.90, 50, "informatica"),
@@ -55,11 +57,10 @@ SEED_PRODUTOS = [
     ("Camiseta Dev", "Camiseta estampa código", 59.90, 100, "vestuario"),
 ]
 
-# Usuários fictícios de desenvolvimento. As senhas são gravadas com hash.
 SEED_USUARIOS = [
-    ("Admin", "admin@loja.com", "admin123", "admin"),
-    ("João Silva", "joao@email.com", "123456", "cliente"),
-    ("Maria Santos", "maria@email.com", "senha123", "cliente"),
+    ("Admin", "admin@loja.com", "admin123", usuario_model.TIPO_ADMIN),
+    ("João Silva", "joao@email.com", "123456", usuario_model.TIPO_PADRAO),
+    ("Maria Santos", "maria@email.com", "senha123", usuario_model.TIPO_PADRAO),
 ]
 
 
@@ -82,31 +83,31 @@ def close_db(_exc=None):
         db.close()
 
 
-def init_schema(conn):
-    conn.executescript(SCHEMA)
-    conn.commit()
+def _seed(conn):
+    if conn.execute("SELECT COUNT(*) FROM produtos").fetchone()[0] > 0:
+        return
+    conn.executemany(
+        "INSERT INTO produtos (nome, descricao, preco, estoque, categoria) VALUES (?, ?, ?, ?, ?)",
+        SEED_PRODUTOS,
+    )
+    for nome, email, senha, tipo in SEED_USUARIOS:
+        usuario_model.criar(conn, nome, email, senha, tipo, commit=False)
 
 
-def seed(conn):
-    with conn:
-        if conn.execute("SELECT COUNT(*) FROM produtos").fetchone()[0] > 0:
-            return
-        conn.executemany(
-            "INSERT INTO produtos (nome, descricao, preco, estoque, categoria) VALUES (?, ?, ?, ?, ?)",
-            SEED_PRODUTOS,
-        )
-        conn.executemany(
-            "INSERT INTO usuarios (nome, email, senha, tipo) VALUES (?, ?, ?, ?)",
-            [(nome, email, generate_password_hash(senha), tipo) for nome, email, senha, tipo in SEED_USUARIOS],
-        )
-    logger.info("Seed aplicado: %d produtos, %d usuários", len(SEED_PRODUTOS), len(SEED_USUARIOS))
+def init_db(path):
+    conn = connect(path)
+    try:
+        with conn:
+            conn.executescript(SCHEMA)
+        with conn:
+            _seed(conn)
+        migradas = usuario_model.migrar_senhas_legadas(conn)
+        if migradas:
+            logger.info("senhas_legadas_migradas total=%s", migradas)
+    finally:
+        conn.close()
 
 
 def init_app(app):
-    conn = connect(app.config["DATABASE_PATH"])
-    try:
-        init_schema(conn)
-        seed(conn)
-    finally:
-        conn.close()
+    init_db(app.config["DATABASE_PATH"])
     app.teardown_appcontext(close_db)

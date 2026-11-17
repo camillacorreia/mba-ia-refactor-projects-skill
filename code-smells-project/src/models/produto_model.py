@@ -1,10 +1,12 @@
-"""Produto: regras de validação, serialização e acesso à tabela produtos."""
-from src.errors import ValidationError
+"""Produtos: acesso a dados, regras de validação e serialização."""
+import numbers
+
+from src.errors import ConflictError, ValidationError
 
 CATEGORIAS_VALIDAS = ["informatica", "moveis", "vestuario", "geral", "eletronicos", "livros"]
 CATEGORIA_PADRAO = "geral"
-NOME_MIN_CHARS = 2
-NOME_MAX_CHARS = 200
+NOME_MIN_CARACTERES = 2
+NOME_MAX_CARACTERES = 200
 
 
 def to_dict(row):
@@ -21,12 +23,12 @@ def to_dict(row):
 
 
 def _is_number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool)
+    return isinstance(value, numbers.Real) and not isinstance(value, bool)
 
 
 def validar(dados):
-    """Valida o payload de criação e de atualização (mesmas regras) e devolve os campos normalizados."""
-    if not dados or not isinstance(dados, dict):
+    """Validação única usada no cadastro e na atualização."""
+    if not dados:
         raise ValidationError("Dados inválidos")
     if "nome" not in dados:
         raise ValidationError("Nome é obrigatório")
@@ -41,10 +43,6 @@ def validar(dados):
     estoque = dados["estoque"]
     categoria = dados.get("categoria", CATEGORIA_PADRAO)
 
-    if not isinstance(nome, str):
-        raise ValidationError("Nome deve ser texto")
-    if not isinstance(descricao, str):
-        raise ValidationError("Descrição deve ser texto")
     if not _is_number(preco):
         raise ValidationError("Preço deve ser numérico")
     if not isinstance(estoque, int) or isinstance(estoque, bool):
@@ -53,10 +51,12 @@ def validar(dados):
         raise ValidationError("Preço não pode ser negativo")
     if estoque < 0:
         raise ValidationError("Estoque não pode ser negativo")
-    if len(nome) < NOME_MIN_CHARS:
+    if not isinstance(nome, str) or len(nome) < NOME_MIN_CARACTERES:
         raise ValidationError("Nome muito curto")
-    if len(nome) > NOME_MAX_CHARS:
+    if len(nome) > NOME_MAX_CARACTERES:
         raise ValidationError("Nome muito longo")
+    if not isinstance(descricao, str):
+        raise ValidationError("Descrição inválida")
     if categoria not in CATEGORIAS_VALIDAS:
         raise ValidationError("Categoria inválida. Válidas: " + str(CATEGORIAS_VALIDAS))
 
@@ -86,31 +86,32 @@ def buscar(db, termo=None, categoria=None, preco_min=None, preco_max=None):
     if preco_max:
         condicoes.append("preco <= ?")
         params.append(preco_max)
-    sql = "SELECT * FROM produtos WHERE " + " AND ".join(condicoes) + " ORDER BY id"
+    sql = f"SELECT * FROM produtos WHERE {' AND '.join(condicoes)} ORDER BY id"
     return [to_dict(row) for row in db.execute(sql, params)]
 
 
-def criar(db, campos):
+def criar(db, dados):
     with db:
         cursor = db.execute(
             "INSERT INTO produtos (nome, descricao, preco, estoque, categoria) VALUES (?, ?, ?, ?, ?)",
-            (campos["nome"], campos["descricao"], campos["preco"], campos["estoque"], campos["categoria"]),
+            (dados["nome"], dados["descricao"], dados["preco"], dados["estoque"], dados["categoria"]),
         )
     return cursor.lastrowid
 
 
-def atualizar(db, produto_id, campos):
+def atualizar(db, produto_id, dados):
     with db:
         db.execute(
             "UPDATE produtos SET nome = ?, descricao = ?, preco = ?, estoque = ?, categoria = ? WHERE id = ?",
-            (campos["nome"], campos["descricao"], campos["preco"], campos["estoque"], campos["categoria"], produto_id),
+            (dados["nome"], dados["descricao"], dados["preco"], dados["estoque"], dados["categoria"], produto_id),
         )
-
-
-def possui_pedidos(db, produto_id):
-    return db.execute("SELECT 1 FROM itens_pedido WHERE produto_id = ? LIMIT 1", (produto_id,)).fetchone() is not None
 
 
 def deletar(db, produto_id):
     with db:
+        em_pedidos = db.execute(
+            "SELECT 1 FROM itens_pedido WHERE produto_id = ? LIMIT 1", (produto_id,)
+        ).fetchone()
+        if em_pedidos:
+            raise ConflictError("Produto possui pedidos e não pode ser removido")
         db.execute("DELETE FROM produtos WHERE id = ?", (produto_id,))

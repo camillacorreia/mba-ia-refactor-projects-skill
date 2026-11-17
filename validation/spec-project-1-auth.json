@@ -1,0 +1,362 @@
+[
+ {
+  "name": "index",
+  "method": "GET",
+  "path": "/",
+  "base": "index"
+ },
+ {
+  "name": "health",
+  "method": "GET",
+  "path": "/health",
+  "base": "health"
+ },
+ {
+  "name": "listar produtos",
+  "method": "GET",
+  "path": "/produtos",
+  "base": "listar produtos"
+ },
+ {
+  "name": "buscar produtos",
+  "method": "GET",
+  "path": "/produtos/busca?q=Mouse&preco_max=500",
+  "base": "buscar produtos"
+ },
+ {
+  "name": "buscar produto",
+  "method": "GET",
+  "path": "/produtos/1",
+  "base": "buscar produto"
+ },
+ {
+  "name": "produto inexistente",
+  "method": "GET",
+  "path": "/produtos/9999",
+  "base": "produto inexistente"
+ },
+ {
+  "name": "criar produto",
+  "method": "POST",
+  "path": "/produtos",
+  "body": {
+   "nome": "Produto Smoke",
+   "descricao": "teste",
+   "preco": 10.5,
+   "estoque": 5,
+   "categoria": "geral"
+  },
+  "save": {
+   "pid": "dados.id"
+  },
+  "base": "criar produto"
+ },
+ {
+  "name": "criar produto invalido",
+  "method": "POST",
+  "path": "/produtos",
+  "body": {
+   "nome": "X"
+  },
+  "base": "criar produto invalido"
+ },
+ {
+  "name": "atualizar produto",
+  "method": "PUT",
+  "path": "/produtos/{{pid}}",
+  "body": {
+   "nome": "Produto Smoke 2",
+   "preco": 11,
+   "estoque": 4,
+   "categoria": "geral"
+  },
+  "base": "atualizar produto"
+ },
+ {
+  "name": "deletar produto",
+  "method": "DELETE",
+  "path": "/produtos/{{pid}}",
+  "base": "deletar produto"
+ },
+ {
+  "name": "listar usuarios (sem credencial)",
+  "method": "GET",
+  "path": "/usuarios",
+  "expect": 403
+ },
+ {
+  "name": "listar usuarios (admin)",
+  "method": "GET",
+  "path": "/usuarios",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "listar usuarios"
+ },
+ {
+  "name": "buscar usuario (sem credencial)",
+  "method": "GET",
+  "path": "/usuarios/1",
+  "expect": 403
+ },
+ {
+  "name": "buscar usuario (admin)",
+  "method": "GET",
+  "path": "/usuarios/1",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "buscar usuario"
+ },
+ {
+  "name": "criar usuario",
+  "method": "POST",
+  "path": "/usuarios",
+  "body": {
+   "nome": "Smoke",
+   "email": "smoke@teste.com",
+   "senha": "segredo123"
+  },
+  "base": "criar usuario"
+ },
+ {
+  "name": "login ok (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "senha": "123456"
+  },
+  "base": "login ok (seed)"
+ },
+ {
+  "name": "login admin (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "admin@loja.com",
+   "senha": "admin123"
+  },
+  "save": {
+   "admtok": "token"
+  },
+  "expect": 200
+ },
+ {
+  "name": "relatorio vendas (bearer admin)",
+  "method": "GET",
+  "path": "/relatorios/vendas",
+  "headers": {
+   "Authorization": "Bearer {{admtok}}"
+  },
+  "expect": 200
+ },
+ {
+  "name": "login cliente (seed)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "senha": "123456"
+  },
+  "save": {
+   "clitok": "token"
+  },
+  "expect": 200
+ },
+ {
+  "name": "listar usuarios (bearer cliente)",
+  "method": "GET",
+  "path": "/usuarios",
+  "headers": {
+   "Authorization": "Bearer {{clitok}}"
+  },
+  "expect": 403
+ },
+ {
+  "name": "relatorio vendas (token adulterado)",
+  "method": "GET",
+  "path": "/relatorios/vendas",
+  "headers": {
+   "Authorization": "Bearer {{admtok}}x"
+  },
+  "expect": 403
+ },
+ {
+  "name": "relatorio vendas (X-Admin-Token errado)",
+  "method": "GET",
+  "path": "/relatorios/vendas",
+  "headers": {
+   "X-Admin-Token": "errado"
+  },
+  "expect": 403
+ },
+ {
+  "name": "login ok (criado)",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "smoke@teste.com",
+   "senha": "segredo123"
+  },
+  "base": "login ok (criado)"
+ },
+ {
+  "name": "login errado",
+  "method": "POST",
+  "path": "/login",
+  "body": {
+   "email": "joao@email.com",
+   "senha": "errada"
+  },
+  "base": "login errado"
+ },
+ {
+  "name": "criar pedido",
+  "method": "POST",
+  "path": "/pedidos",
+  "body": {
+   "usuario_id": 2,
+   "itens": [
+    {
+     "produto_id": 2,
+     "quantidade": 1
+    },
+    {
+     "produto_id": 3,
+     "quantidade": 2
+    }
+   ]
+  },
+  "save": {
+   "oid": "dados.pedido_id"
+  },
+  "base": "criar pedido"
+ },
+ {
+  "name": "pedido sem estoque",
+  "method": "POST",
+  "path": "/pedidos",
+  "body": {
+   "usuario_id": 2,
+   "itens": [
+    {
+     "produto_id": 1,
+     "quantidade": 99999
+    }
+   ]
+  },
+  "base": "pedido sem estoque"
+ },
+ {
+  "name": "listar pedidos (sem credencial)",
+  "method": "GET",
+  "path": "/pedidos",
+  "expect": 403
+ },
+ {
+  "name": "listar pedidos (admin)",
+  "method": "GET",
+  "path": "/pedidos",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "listar pedidos"
+ },
+ {
+  "name": "pedidos do usuario (sem credencial)",
+  "method": "GET",
+  "path": "/pedidos/usuario/2",
+  "expect": 403
+ },
+ {
+  "name": "pedidos do usuario (admin)",
+  "method": "GET",
+  "path": "/pedidos/usuario/2",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "pedidos do usuario"
+ },
+ {
+  "name": "atualizar status (sem credencial)",
+  "method": "PUT",
+  "path": "/pedidos/{{oid}}/status",
+  "body": {
+   "status": "aprovado"
+  },
+  "expect": 403
+ },
+ {
+  "name": "atualizar status (admin)",
+  "method": "PUT",
+  "path": "/pedidos/{{oid}}/status",
+  "body": {
+   "status": "aprovado"
+  },
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "atualizar status"
+ },
+ {
+  "name": "status invalido (sem credencial)",
+  "method": "PUT",
+  "path": "/pedidos/{{oid}}/status",
+  "body": {
+   "status": "xyz"
+  },
+  "expect": 403
+ },
+ {
+  "name": "status invalido (admin)",
+  "method": "PUT",
+  "path": "/pedidos/{{oid}}/status",
+  "body": {
+   "status": "xyz"
+  },
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "status invalido"
+ },
+ {
+  "name": "relatorio vendas (sem credencial)",
+  "method": "GET",
+  "path": "/relatorios/vendas",
+  "expect": 403
+ },
+ {
+  "name": "relatorio vendas (admin)",
+  "method": "GET",
+  "path": "/relatorios/vendas",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "relatorio vendas"
+ },
+ {
+  "name": "admin query",
+  "method": "POST",
+  "path": "/admin/query",
+  "body": {
+   "sql": "SELECT COUNT(*) AS n FROM produtos"
+  },
+  "base": "admin query"
+ },
+ {
+  "name": "admin reset-db (sem credencial)",
+  "method": "POST",
+  "path": "/admin/reset-db",
+  "expect": 403
+ },
+ {
+  "name": "admin reset-db (admin)",
+  "method": "POST",
+  "path": "/admin/reset-db",
+  "headers": {
+   "X-Admin-Token": "token-local-smoke"
+  },
+  "base": "admin reset-db"
+ }
+]
